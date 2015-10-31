@@ -1,14 +1,16 @@
 use std::collections::HashMap;
+// extern crate vec_map;
+// use vec_map::VecMap;
 
 macro_rules! hashmap {
     ($( $key: expr => $val: expr ),*) => {{
-         let mut map:HashMap<(char,char), i32> = HashMap::new();
-         $( map.insert($key, $val); )*
+         let mut map:HashMap<(u8,u8), i32> = HashMap::new();
+         $( map.insert(($key.0 as u8, $key.1 as u8), $val); )*
          map
     }}
 }
 
-fn blosum62(a: char, b: char) -> i32 {
+fn blosum62(a: u8, b: u8) -> i32 {
 	let blosum62 = hashmap![
 		('W', 'F') => 1, ('L', 'R') => -2, ('S', 'P') => -1, ('V', 'T') => 0,
 		('Q', 'Q') => 5, ('N', 'A') => -2, ('Z', 'Y') => -2, ('W', 'R') => -3,
@@ -85,6 +87,9 @@ fn blosum62(a: char, b: char) -> i32 {
 
 fn main(){
     // example
-	println!("{}" ,blosum62('B', 'F')); //returns -3
-	//println!("{}" ,blosum62('F', 'B')); //thread '<main>' panicked at 'called `Option::unwrap()` on a `None` value'
+	let b:u8='B' as u8;
+	println!("{}" , b );
+	println!("{}" , blosum62(b,b) ); //returns 4
+	println!("{}" , blosum62('F' as u8, b)); //empty
+	// let mut vecmap :VecMap<i32> = VecMap::news();
 }
