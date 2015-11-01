@@ -1,5 +1,15 @@
 extern crate nalgebra;
+extern crate vec_map;
 use nalgebra::DMat;
+use vec_map::VecMap;
+ 
+macro_rules! vecmap {
+	($( $key: expr => $val: expr ),*) => {{
+		let mut map = VecMap::new();
+		$( map.insert($key as usize, $val ); )*
+		map
+	}}
+}
 
 fn blosum62(a: u8, b: u8) -> i32 {
 	// taken from https://github.com/seqan/seqan/blob/master/include%2Fseqan%2Fscore%2Fscore_matrix_data.h#L327
@@ -33,26 +43,19 @@ fn blosum62(a: u8, b: u8) -> i32 {
 		-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1
 	];
 	
-	let mat= DMat::from_row_vec(27, 27, &array);
+	//in row there's no O, substituted by X. https://github.com/seqan/seqan/blob/master/include%2Fseqan%2Fscore%2Fscore_matrix_data.h#L291
+	let col = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'O'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
+	let row = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'X'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
 
-	// `if` is used for handling `*` which has the value of 42 in ASCII table, convert them to 26 directly.
+	let mat= DMat::from_col_vec(27, 27, &array);
 
-	let a_ = if a!=42 {
-		(a-65) as usize
-	} else {26};
-
-	let b_ = if b!=42 {
-		(b-65) as usize
-	} else {26};
-
-	mat[(a_,b_)]
+	mat[(col[a as usize], row[b as usize] )]
 }
 
 fn main(){
 	// example
 	let a:u8='A' as u8;
 
-	println!("{}" , '*' as u8 );
-	println!("{}" , blosum62(a, a+1) ); //returns -2
-	println!("{}" , blosum62(a, '*' as u8) ); //returns -4
+	println!("{}" , blosum62(a, a+1) ); //returns -2	
+	println!("{}" , blosum62('O' as u8, 'X' as u8) ); //returns -1
 }
