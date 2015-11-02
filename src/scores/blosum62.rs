@@ -1,19 +1,24 @@
+#[macro_use]
+extern crate lazy_static;
+
 extern crate nalgebra;
 extern crate vec_map;
+
 use nalgebra::DMat;
 use vec_map::VecMap;
  
 macro_rules! vecmap {
 	($( $key: expr => $val: expr ),*) => {{
-		let mut map = VecMap::new();
+		let mut map: VecMap<usize> = VecMap::with_capacity(27);
 		$( map.insert($key as usize, $val ); )*
 		map
 	}}
 }
 
-fn blosum62(a: u8, b: u8) -> i32 {
+lazy_static! {
+
 	// taken from https://github.com/seqan/seqan/blob/master/include%2Fseqan%2Fscore%2Fscore_matrix_data.h#L327
-	let array :[i32; 729]= [
+	static ref ARRAY: [i32;729]=[
 		 4, -2,  0, -2, -1, -2,  0, -2, -1, -1, -1, -1, -1, -2,  0, -1, -1, -1,  1,  0,  0,  0, -3, -2, -1,  0, -4,
 		-2,  4, -3,  4,  1, -3, -1,  0, -3, -4,  0, -4, -3,  3, -1, -2,  0, -1,  0, -1, -1, -3, -4, -3,  1, -1, -4,
 		 0, -3,  9, -3, -4, -2, -3, -3, -1, -1, -3, -1, -1, -3, -2, -3, -3, -3, -1, -1, -2, -1, -2, -2, -3, -2, -4,
@@ -42,20 +47,13 @@ fn blosum62(a: u8, b: u8) -> i32 {
 		 0, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -1, -1,  0,  0, -1, -1, -2, -1, -1, -1, -4,
 		-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1
 	];
-	
+
 	//in row there's no O, substituted by X. https://github.com/seqan/seqan/blob/master/include%2Fseqan%2Fscore%2Fscore_matrix_data.h#L291
-	let col = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'O'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
-	let row = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'X'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
-
-	let mat= DMat::from_col_vec(27, 27, &array);
-
-	mat[(col[a as usize], row[b as usize] )]
+	static ref COL: VecMap<usize> = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'O'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
+	static ref ROW: VecMap<usize> = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'X'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
+	static ref MAT: DMat<i32> = DMat::from_col_vec(27, 27, &*ARRAY);
 }
 
-fn main(){
-	// example
-	let a:u8='A' as u8;
-
-	println!("{}" , blosum62(a, a+1) ); //returns -2	
-	println!("{}" , blosum62('O' as u8, 'X' as u8) ); //returns -1
+pub fn blosum62(a: u8, b: u8) -> i32 {	
+	MAT[(COL[a as usize], ROW[b as usize] )]
 }
