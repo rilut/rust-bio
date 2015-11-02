@@ -2,18 +2,8 @@
 extern crate lazy_static;
 
 extern crate nalgebra;
-extern crate vec_map;
 
 use nalgebra::DMat;
-use vec_map::VecMap;
- 
-macro_rules! vecmap {
-	($( $key: expr => $val: expr ),*) => {{
-		let mut map: VecMap<usize> = VecMap::with_capacity(27);
-		$( map.insert($key as usize, $val ); )*
-		map
-	}}
-}
 
 lazy_static! {
 
@@ -48,12 +38,17 @@ lazy_static! {
 		-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1
 	];
 
-	//in row there's no O, substituted by X. https://github.com/seqan/seqan/blob/master/include%2Fseqan%2Fscore%2Fscore_matrix_data.h#L291
-	static ref COL: VecMap<usize> = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'O'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
-	static ref ROW: VecMap<usize> = vecmap!['A'=>0, 'B'=>1, 'C'=>2, 'D'=>3, 'E'=>4, 'F'=>5, 'G'=>6, 'H'=>7, 'I'=>8, 'J'=>9, 'K'=>10, 'L'=>11, 'M'=>12, 'N'=>13, 'X'=>14, 'P'=>15, 'Q'=>16, 'R'=>17, 'S'=>18, 'T'=>19, 'U'=>20, 'V'=>21, 'W'=>22, 'Y'=>23, 'X'=>24, 'Z'=>25, '*'=>26];
 	static ref MAT: DMat<i32> = DMat::from_col_vec(27, 27, &*ARRAY);
 }
 
 pub fn blosum62(a: u8, b: u8) -> i32 {	
-	MAT[(COL[a as usize], ROW[b as usize] )]
+	let a = if a!=42 {
+		(a-65) as usize
+	} else {26};	
+
+	let b = if b!=42 {
+		(b-65) as usize
+	} else {26};	
+
+	MAT[(a as usize, b as usize)]
 }
