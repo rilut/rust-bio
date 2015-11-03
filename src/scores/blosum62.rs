@@ -41,14 +41,15 @@ lazy_static! {
 	static ref MAT: DMat<i32> = DMat::from_col_vec(27, 27, &*ARRAY);
 }
 
+#[inline]
+fn lookup(number: u8) -> usize {
+    if number!=42 { (number-65) as usize }
+	else {26 as usize}
+}
+
 pub fn blosum62(a: u8, b: u8) -> i32 {	
-	let a = if a!=42 {
-		(a-65) as usize
-	} else {26};	
+	let a = lookup(a);
+	let b = lookup(b);
 
-	let b = if b!=42 {
-		(b-65) as usize
-	} else {26};	
-
-	MAT[(a as usize, b as usize)]
+	MAT[(a, b)]
 }
